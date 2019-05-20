@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import { CsvService } from '../shared/csv.service';
 
 @Controller('headers')
@@ -7,7 +8,12 @@ export class HeadersController {
   public constructor(private readonly csvService: CsvService) {}
 
   @Get()
-  public async headers(): Promise<string[]> {
-    return await this.csvService.getHeaders();
+  public headers(): Observable<string[]> {
+    return this.csvService.getHeaders();
+  }
+
+  @Get('column')
+  public column(): Observable<string[]> {
+    return this.csvService.getColumn('brand');
   }
 }
