@@ -2,21 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import * as glob from 'glob';
 import * as csvParser from 'csv-parser';
+import { from, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CsvService {
 
   private csv: object[] = [];
 
-  public getHeaders(): Promise<string[]> {
-    return this.getCsv().then(array => Object.keys(array[0]));
+  public getHeaders(): Observable<string[]> {
+    return this.getCsv().pipe(map(array => Object.keys(array[0])));
   }
 
-  private getCsv(): Promise<object[]> {
-    if (this.csv.length !== 0) { return Promise.resolve((this.csv)); }
+  public getColumn(name: string): Observable<string[]> {
+    return this.getCsv().pipe(map(value => {
+      return value.map(entry => entry[name]);
+    }));
+  }
 
-    return new Promise<object[]>((resolve, reject) => {
+  private getCsv(): Observable<object[]> {
+    if (this.csv.length !== 0) { return of(this.csv); }
 
+    return from(new Promise<object[]>((resolve, reject) => {
       glob('resources/*.csv', (error, files) => {
         if (error) { reject(error); }
 
@@ -26,6 +33,7 @@ export class CsvService {
           .on('end', () => resolve(this.csv))
           .on('error', err => reject(err));
       });
-    });
+    }));
   }
+
 }
