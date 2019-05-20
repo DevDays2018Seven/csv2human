@@ -18,6 +18,13 @@ export class CsvService {
     return this.getCsv().pipe(map(array => array.map(entry => entry[name])));
   }
 
+  public getValuePairs(column1: string, column2: string): Observable<Array<{ ping: string, pong: string }>> {
+    return this.getCsv().pipe(map(array => array.map(entry => ({
+      ping: entry[column1],
+      pong: entry[column2],
+    }))));
+  }
+
   private getCsv(): Observable<object[]> {
     if (this.csv.length !== 0) { return of(this.csv); }
 
