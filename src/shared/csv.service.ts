@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import * as glob from 'glob';
 import * as csvParser from 'csv-parser';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CsvService {
@@ -10,6 +12,10 @@ export class CsvService {
 
   public getHeaders(): Promise<string[]> {
     return this.getCsv().then(array => Object.keys(array[0]));
+  }
+
+  public getColumn(name: string): Observable<string[]> {
+    return of([{ one: 1, two: 2 }, { one: 1, two: 2 }, { one: 1, two: 2 }]).pipe(map(value => value['one']));
   }
 
   private getCsv(): Promise<object[]> {
