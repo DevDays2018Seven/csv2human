@@ -33,11 +33,13 @@ export class PlotController {
   public distribution(
     @Param('name') name: string,
     @Param('count') count: string,
+    @Query('outlier') outlier: string,
   ): Observable<{ data: number[], labels: string[] }> {
     const numericalCount: number = Number(count);
 
     return this.csvService.getColumn(name).pipe(
       map(value => value.map(entry => Number(entry))),
+      map(o => outlier === 'dixon-q' ? PlotController.dixonQTest(o) : o),
       map(value => {
         const data: number[] = [...new Array<number>(numericalCount)].map(_ => 0);
 
