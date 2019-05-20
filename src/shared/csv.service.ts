@@ -15,9 +15,7 @@ export class CsvService {
   }
 
   public getColumn(name: string): Observable<string[]> {
-    return this.getCsv().pipe(map(value => {
-      return value.map(entry => entry[name]);
-    }));
+    return this.getCsv().pipe(map(array => array.map(entry => entry[name])));
   }
 
   private getCsv(): Observable<object[]> {
