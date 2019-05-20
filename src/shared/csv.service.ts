@@ -7,7 +7,11 @@ export class CsvService {
 
   private csv: object[] = [];
 
-  public getCsv(): Promise<object[]> {
+  public getHeaders(): Promise<string[]> {
+    return this.getCsv().then(array => Object.keys(array[0]));
+  }
+
+  private getCsv(): Promise<object[]> {
     if (this.csv.length !== 0) { return Promise.resolve((this.csv)); }
 
     return new Promise<object[]>((resolve, reject) => {
