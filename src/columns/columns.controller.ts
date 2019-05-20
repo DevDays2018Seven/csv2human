@@ -1,5 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CsvService } from '../shared/csv.service';
 
 @Controller('columns')
@@ -11,8 +12,32 @@ export class ColumnsController {
   public column(
     @Param('name') name: string,
     @Param('count') count: string,
-  ): Observable<string[]> {
-    return this.csvService.getColumn(name);
+  ): Observable<{ data: number[], labels: string[] }> {
+    const numericalCount: number = Number(count);
+
+    return this.csvService.getColumn(name).pipe(
+      map(value => value.map(entry => Number(entry))),
+      map(value => {
+        const labels: string[] = [...new Array(numericalCount)].map((_, index) => {
+          return index.toString();
+        });
+
+        const data: number[] = [...new Array<number>(numericalCount)].map(_ => 0);
+
+        const filterNaN = value.filter(v => !isNaN(v));
+
+        const max: number = Math.max(...filterNaN);
+        const min: number = Math.min(...filterNaN);
+
+        filterNaN.forEach(entry => {
+          const width = (max - min) / numericalCount;
+
+          data[Math.min(numericalCount - 1, Math.floor((entry - min) / width))]++;
+        });
+
+        return {data, labels};
+      }),
+    );
   }
 
 }
