@@ -18,10 +18,6 @@ export class ColumnsController {
     return this.csvService.getColumn(name).pipe(
       map(value => value.map(entry => Number(entry))),
       map(value => {
-        const labels: string[] = [...new Array(numericalCount)].map((_, index) => {
-          return index.toString();
-        });
-
         const data: number[] = [...new Array<number>(numericalCount)].map(_ => 0);
 
         const filterNaN = value.filter(v => !isNaN(v));
@@ -29,10 +25,14 @@ export class ColumnsController {
         const max: number = Math.max(...filterNaN);
         const min: number = Math.min(...filterNaN);
 
-        filterNaN.forEach(entry => {
-          const width = (max - min) / numericalCount;
+        const width = (max - min) / numericalCount;
 
+        filterNaN.forEach(entry => {
           data[Math.min(numericalCount - 1, Math.floor((entry - min) / width))]++;
+        });
+
+        const labels: string[] = [...new Array(numericalCount)].map((_, index) => {
+          return `< ${Math.floor((index + 1) * width)}`;
         });
 
         return {data, labels};
