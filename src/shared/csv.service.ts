@@ -9,6 +9,8 @@ import { map } from 'rxjs/operators';
 export class CsvService {
 
   private csv: object[] = [];
+  private selectedCsv: string;
+  private fileNames: string[] = [];
 
   public getHeaders(): Observable<string[]> {
     return this.getCsv().pipe(map(array => Object.keys(array[0])));
@@ -25,20 +27,36 @@ export class CsvService {
     }))));
   }
 
-  private getCsv(): Observable<object[]> {
-    if (this.csv.length !== 0) { return of(this.csv); }
+  public getCsvFileNames(): Observable<string[]> {
+    if (this.fileNames.length !== 0) {
+      return of(this.fileNames);
+    }
 
-    return from(new Promise<object[]>((resolve, reject) => {
+    return from(new Promise<string[]>((resolve, reject) => {
       glob('resources/*.csv', (error, files) => {
-        if (error) { reject(error); }
-
-        createReadStream(files[0])
-          .pipe(csvParser())
-          .on('data', chunk => this.csv.push(chunk))
-          .on('end', () => resolve(this.csv))
-          .on('error', err => reject(err));
+        if (error) {
+          reject(error);
+        }
+        this.fileNames = files;
+        resolve(this.fileNames);
       });
     }));
   }
 
+  public setSelectedCsv(name: string): void {
+    this.selectedCsv = name;
+  }
+
+  private getCsv(): Observable<object[]> {
+    if (this.selectedCsv) {
+      return from(new Promise<object[]>((resolve, reject) => {
+        createReadStream(this.selectedCsv)
+          .pipe(csvParser())
+          .on('data', chunk => this.csv.push(chunk))
+          .on('end', () => resolve(this.csv))
+          .on('error', err => reject(err));
+      }));
+    }
+    return of();
+  }
 }
