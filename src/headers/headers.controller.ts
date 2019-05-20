@@ -11,9 +11,4 @@ export class HeadersController {
   public headers(): Observable<string[]> {
     return this.csvService.getHeaders();
   }
-
-  @Get('column')
-  public column(): Observable<string[]> {
-    return this.csvService.getColumn('brand');
-  }
 }
