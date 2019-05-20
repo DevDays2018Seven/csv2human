@@ -1,14 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import * as glob from 'glob';
 import * as csvParser from 'csv-parser';
 import { from, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 
 @Injectable()
-export class CsvService {
+export class CsvService implements OnModuleInit {
 
   private csv: object[] = [];
+  private selectedCsv: string;
+  private fileNames: string[] = [];
+
+  public onModuleInit(): void {
+    this.loadFiles().pipe(take(1)).subscribe();
+  }
 
   public getHeaders(): Observable<string[]> {
     return this.getCsv().pipe(map(array => Object.keys(array[0])));
@@ -25,20 +31,35 @@ export class CsvService {
     }))));
   }
 
+  public getCsvFileNames(): Observable<string[]> {
+    if (this.fileNames.length !== 0) {
+      return of(this.fileNames);
+    }
+  }
+
+  public setSelectedCsv(name: string): void {
+    this.selectedCsv = name;
+  }
+
   private getCsv(): Observable<object[]> {
-    if (this.csv.length !== 0) { return of(this.csv); }
-
     return from(new Promise<object[]>((resolve, reject) => {
-      glob('resources/*.csv', (error, files) => {
-        if (error) { reject(error); }
-
-        createReadStream(files[0])
-          .pipe(csvParser())
-          .on('data', chunk => this.csv.push(chunk))
-          .on('end', () => resolve(this.csv))
-          .on('error', err => reject(err));
-      });
+      createReadStream(`resources/${this.selectedCsv}` || `resources/${this.fileNames[0]}`)
+        .pipe(csvParser())
+        .on('data', chunk => this.csv.push(chunk))
+        .on('end', () => resolve(this.csv))
+        .on('error', err => reject(err));
     }));
   }
 
+  private loadFiles(): Observable<void> {
+    return from(new Promise<void>((resolve, reject) => {
+      glob('resources/*.csv', (error, files) => {
+        if (error) {
+          reject(error);
+        }
+        this.fileNames = files.replace('resources/', '');
+        resolve();
+      });
+    }));
+  }
 }
