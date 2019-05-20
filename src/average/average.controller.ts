@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CsvService } from '../shared/csv.service';
+import { calcMax, calcMin } from '../shared/helper.function';
 
 @Controller('average')
 export class AverageController {
@@ -52,6 +53,6 @@ export class AverageController {
   }
 
   private static calculateMidRange(numbers: number[]): number {
-    return (Math.max(...numbers) + Math.min(...numbers)) / 2;
+    return (calcMax(numbers) + calcMin(numbers)) / 2;
   }
 }

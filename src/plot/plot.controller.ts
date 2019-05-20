@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { CsvService } from '../shared/csv.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { calcMax, calcMin } from '../shared/helper.function';
 
 @Controller('plot')
 export class PlotController {
@@ -45,8 +46,8 @@ export class PlotController {
 
         const filterNaN = value.filter(v => !isNaN(v));
 
-        const max: number = Math.max(...filterNaN);
-        const min: number = Math.min(...filterNaN);
+        const max: number = calcMax(filterNaN);
+        const min: number = calcMin(filterNaN);
 
         const width = (max - min) / numericalCount;
 
