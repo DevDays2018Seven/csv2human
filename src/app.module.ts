@@ -12,4 +12,5 @@ import { CsvController } from './csv/csv.controller';
   controllers: [AppController, HeadersController, AverageController, PlotController, CsvController],
   providers: [AppService, CsvService],
 })
-export class AppModule {}
+export class AppModule {
+}

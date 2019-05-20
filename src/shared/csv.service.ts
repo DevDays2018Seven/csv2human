@@ -43,7 +43,7 @@ export class CsvService implements OnModuleInit {
 
   private getCsv(): Observable<object[]> {
     return from(new Promise<object[]>((resolve, reject) => {
-      createReadStream(this.selectedCsv || this.fileNames[0])
+      createReadStream(`resources/${this.selectedCsv}` || `resources/${this.fileNames[0]}`)
         .pipe(csvParser())
         .on('data', chunk => this.csv.push(chunk))
         .on('end', () => resolve(this.csv))
@@ -57,7 +57,7 @@ export class CsvService implements OnModuleInit {
         if (error) {
           reject(error);
         }
-        this.fileNames = files;
+        this.fileNames = files.replace('resources/', '');
         resolve();
       });
     }));
