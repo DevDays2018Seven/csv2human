@@ -7,7 +7,7 @@ export class HeadersController {
   public constructor(private readonly csvService: CsvService) {}
 
   @Get()
-  public headers(): object {
-    return JSON.parse(this.csvService.getCsv());
+  public async headers(): Promise<object[]> {
+    return await this.csvService.getCsv();
   }
 }
